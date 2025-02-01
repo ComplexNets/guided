@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}My Journal{% endblock %}
+
+{% block content %}
+<div class="writing-panel">
+    <div class="writing-container text-center text-muted d-flex flex-column justify-content-center">
+        <h3>Welcome to Your Journal</h3>
+        <p class="lead">Select an entry to edit or create a new one</p>
+        <div>
+            <a href="{% url 'new_entry' %}" class="btn btn-primary">New Entry</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block feedback %}
+{% if entries %}
+    {% with latest_entry=entries.first %}
+        {% if latest_entry.feedback %}
+        <div class="feedback-card">
+            <h6 class="text-muted mb-2">Latest Feedback</h6>
+            <p class="mb-0">{{ latest_entry.feedback }}</p>
+            <small class="text-muted d-block mt-2">From: {{ latest_entry.title }}</small>
+        </div>
+        {% endif %}
+    {% endwith %}
+{% endif %}
+{% endblock %}
