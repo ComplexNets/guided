@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="writing-panel">
+    <div class="writing-container">
+        <h2 class="mb-4">Your Profile</h2>
+        
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Basic Information</h5>
+                    <div class="mb-3">
+                        <label for="{{ form.age.id_for_label }}" class="form-label">Age</label>
+                        {{ form.age }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.occupation.id_for_label }}" class="form-label">Occupation</label>
+                        {{ form.occupation }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Personality Dimensions</h5>
+                    <p class="text-muted small mb-4">Rate yourself on each dimension from 0 to 100</p>
+                    
+                    {% for field in form %}
+                        {% if field.name in 'openness,conscientiousness,extraversion,agreeableness,neuroticism' %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label d-flex justify-content-between">
+                                <span>{{ field.label }}</span>
+                                <span class="text-muted" id="{{ field.name }}_value"></span>
+                            </label>
+                            {{ field }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Personal Information</h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.goals.id_for_label }}" class="form-label">Goals</label>
+                        {{ form.goals }}
+                        <div class="form-text">{{ form.goals.help_text }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.interests.id_for_label }}" class="form-label">Interests</label>
+                        {{ form.interests }}
+                        <div class="form-text">{{ form.interests.help_text }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.values.id_for_label }}" class="form-label">Values</label>
+                        {{ form.values }}
+                        <div class="form-text">{{ form.values.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Save Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update range input values
+    const ranges = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
+    ranges.forEach(function(name) {
+        const input = document.querySelector(`#id_${name}`);
+        const value = document.querySelector(`#${name}_value`);
+        
+        if (input && value) {
+            // Initial value
+            value.textContent = input.value;
+            
+            // Update on change
+            input.addEventListener('input', function() {
+                value.textContent = this.value;
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

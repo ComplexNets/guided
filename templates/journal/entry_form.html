@@ -115,7 +115,7 @@
                     </option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-outline-primary" onclick="analyzeEntry()">
+                <button type="button" class="btn btn-outline-primary" id="analyzeButton">
                     <i class="bi bi-magic"></i> Analyze
                 </button>
                 <span class="ms-2 text-muted small">{{ openai_model }}</span>
@@ -144,19 +144,38 @@ var quill = new Quill('#editor', {
     }
 });
 
-function analyzeEntry() {
-    // Update hidden form field with editor content
-    document.querySelector('#id_content').value = quill.root.innerHTML;
-    
-    // Add a hidden input for the analyze action
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('entryForm');
-    const actionInput = document.createElement('input');
-    actionInput.type = 'hidden';
-    actionInput.name = 'action';
-    actionInput.value = 'analyze';
-    form.appendChild(actionInput);
-    form.submit();
-}
+    const analyzeButton = document.getElementById('analyzeButton');
+    const spinner = document.getElementById('feedbackSpinner');
+    
+    if (analyzeButton) {
+        analyzeButton.addEventListener('click', function() {
+            // Update hidden form field with editor content
+            document.querySelector('#id_content').value = quill.root.innerHTML;
+            
+            // Add a hidden input for the analyze action
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'analyze';
+            form.appendChild(actionInput);
+            
+            // Show spinner
+            if (spinner) {
+                spinner.style.display = 'inline-block';
+            }
+            
+            // Disable analyze button and update text
+            analyzeButton.disabled = true;
+            const originalContent = analyzeButton.innerHTML;
+            analyzeButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
+            
+            // Submit form
+            form.submit();
+        });
+    }
+});
 
 // Update hidden form field before submitting
 document.getElementById('entryForm').addEventListener('submit', function() {
@@ -170,6 +189,7 @@ document.getElementById('entryForm').addEventListener('submit', function() {
 <div class="feedback-card">
     <h6 class="text-muted mb-2">AI Feedback</h6>
     <p class="mb-0">{{ form.instance.feedback }}</p>
+    <div id="feedbackSpinner" style="display: none;">Loading...</div>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import JournalEntry
+from .models import JournalEntry, UserProfile
 
 class JournalEntryForm(forms.ModelForm):
     class Meta:
@@ -22,6 +22,36 @@ class JournalEntryForm(forms.ModelForm):
         labels = {
             'title': '',
             'content': ''
+        }
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['age', 'goals', 'openness', 'conscientiousness', 'extraversion', 
+                 'agreeableness', 'neuroticism', 'occupation', 'interests', 'values']
+        widgets = {
+            'age': forms.NumberInput(attrs={'class': 'form-control'}),
+            'goals': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'openness': forms.NumberInput(attrs={'class': 'form-range', 'type': 'range', 'min': '0', 'max': '100'}),
+            'conscientiousness': forms.NumberInput(attrs={'class': 'form-range', 'type': 'range', 'min': '0', 'max': '100'}),
+            'extraversion': forms.NumberInput(attrs={'class': 'form-range', 'type': 'range', 'min': '0', 'max': '100'}),
+            'agreeableness': forms.NumberInput(attrs={'class': 'form-range', 'type': 'range', 'min': '0', 'max': '100'}),
+            'neuroticism': forms.NumberInput(attrs={'class': 'form-range', 'type': 'range', 'min': '0', 'max': '100'}),
+            'occupation': forms.TextInput(attrs={'class': 'form-control'}),
+            'interests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'values': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+        labels = {
+            'openness': 'Openness to Experience',
+            'conscientiousness': 'Conscientiousness',
+            'extraversion': 'Extraversion',
+            'agreeableness': 'Agreeableness',
+            'neuroticism': 'Neuroticism',
+        }
+        help_texts = {
+            'goals': 'What are your main goals and aspirations?',
+            'interests': 'What are your main interests and hobbies?',
+            'values': 'What are your core values and beliefs?',
         }
 
 class UserRegistrationForm(UserCreationForm):

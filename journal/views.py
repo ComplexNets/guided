@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import JournalEntry
-from .forms import JournalEntryForm
+from django.http import JsonResponse
+from .models import JournalEntry, UserProfile
+from .forms import JournalEntryForm, UserProfileForm
 from .ai_feedback import get_ai_feedback
 from django.conf import settings
 
@@ -76,6 +77,37 @@ def edit_entry(request, pk):
         'entries': entries,
         'active_entry': entry,
         'openai_model': settings.OPENAI_MODEL
+    })
+
+@login_required
+def delete_entry(request, pk):
+    if request.method == 'POST':
+        entry = get_object_or_404(JournalEntry, pk=pk, user=request.user)
+        entry.delete()
+        messages.success(request, "Entry deleted successfully!")
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def profile(request):
+    # Create profile if it doesn't exist
+    if not hasattr(request.user, 'userprofile'):
+        UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
+    
+    entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'journal/profile.html', {
+        'form': form,
+        'entries': entries,
+        'active_entry': None
     })
 
 def register(request):
