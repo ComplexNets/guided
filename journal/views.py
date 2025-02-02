@@ -26,7 +26,7 @@ def new_entry(request):
                 try:
                     mode = request.POST.get('analysis_mode', 'therapist')
                     entry.analysis_mode = mode
-                    entry.feedback = get_ai_feedback(entry.content, mode=mode)
+                    entry.feedback = get_ai_feedback(entry.content, mode=mode, user=request.user)
                     messages.success(request, "Entry analyzed successfully!")
                 except Exception as e:
                     entry.feedback = "AI feedback could not be generated at this time."
@@ -59,7 +59,7 @@ def edit_entry(request, pk):
                 try:
                     mode = request.POST.get('analysis_mode', entry.analysis_mode)
                     entry.analysis_mode = mode
-                    entry.feedback = get_ai_feedback(entry.content, mode=mode)
+                    entry.feedback = get_ai_feedback(entry.content, mode=mode, user=request.user)
                     if action == 'analyze':
                         messages.success(request, "Entry analyzed successfully!")
                 except Exception as e:

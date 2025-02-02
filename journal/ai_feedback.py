@@ -95,16 +95,17 @@ Maintain a depth-oriented, exploratory tone while remaining grounded and support
 Maintain an encouraging, action-oriented tone while being realistic and practical.'''
 }
 
-def get_ai_feedback(content, mode='therapist'):
+def get_ai_feedback(content, mode='therapist', user=None):
     """
     Get AI feedback on journal entry content using specified analysis mode.
     
     Args:
         content (str): The journal entry content to analyze
         mode (str): The analysis mode to use (therapist, mindfulness, reflection, or growth)
+        user (User): The user object to get profile information from
     
     Returns:
-        str: AI-generated feedback based on the selected mode
+        str: AI-generated feedback based on the selected mode and user profile
     """
     if not content.strip():
         return "Please write something in your journal entry before requesting analysis."
@@ -112,14 +113,44 @@ def get_ai_feedback(content, mode='therapist'):
     if mode not in SYSTEM_PROMPTS:
         mode = 'therapist'  # Default to therapist mode if invalid mode specified
     
+    # Get user profile information if available
+    profile_context = ""
+    if user and hasattr(user, 'userprofile'):
+        profile = user.userprofile
+        profile_context = f"""
+User Profile Information:
+- Age: {profile.age if profile.age else 'Not specified'}
+- Occupation: {profile.occupation if profile.occupation else 'Not specified'}
+- Personal Goals: {profile.goals if profile.goals else 'Not specified'}
+- Interests: {profile.interests if profile.interests else 'Not specified'}
+- Values: {profile.values if profile.values else 'Not specified'}
+
+Personality Dimensions (0-100 scale):
+- Openness to Experience: {profile.openness}
+- Conscientiousness: {profile.conscientiousness}
+- Extraversion: {profile.extraversion}
+- Agreeableness: {profile.agreeableness}
+- Neuroticism: {profile.neuroticism}
+
+Please consider this user profile information when providing feedback, tailoring your response to their personality traits, goals, and values.
+"""
+    
     try:
         client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPTS[mode]},
+        ]
+        
+        # Add profile context if available
+        if profile_context:
+            messages.append({"role": "system", "content": profile_context})
+            
+        # Add the journal entry content
+        messages.append({"role": "user", "content": content})
+        
         response = client.chat.completions.create(
             model=settings.OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPTS[mode]},
-                {"role": "user", "content": content}
-            ],
+            messages=messages,
             temperature=0.7,
             max_tokens=500
         )

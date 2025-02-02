@@ -35,3 +35,18 @@ The miniconda environment is here: C:\Users\X1\miniconda3\envs\journal
 ### **AI Approach: Good Prompting**
 
 Instead of implementing a more complex, agent-based orchestration framework, this project will rely on **well-crafted prompts** to generate relevant, psychologically oriented feedback. By preparing distinct system prompts for each “feedback personality” (e.g., Jungian vs. CBT) and guiding the model’s responses, the app can provide nuanced insights without the overhead of managing multi-step reasoning or external tool usage. Should future needs evolve—such as deeper session-based analysis or specialized retrieval of past entries—there is room to introduce an agent approach at a later stage.
+
+## Recent Updates
+
+### Guided Writing Module
+- Added basic structure for guided writing module with program list and session views
+- Implemented guided session progress tracking and navigation
+- Added session information display (title, description, progress bar)
+- Added writing prompt display in left panel
+- Added entries list to left panel for managing multiple entries
+- Added AI feedback display in right panel
+- Added save/analyze/next session functionality
+- **In Progress**: Working on matching the editor layout and styling to match the free writing module template
+  - Need to fix Quill.js editor display and toolbar
+  - Need to ensure proper layout and spacing of writing area
+  - Need to fix button placement and styling

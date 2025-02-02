@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Guided Writing Programs</h2>
+    
+    <div class="row">
+        {% for status in program_status %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ status.program.name }}</h5>
+                    <p class="card-text">{{ status.program.description }}</p>
+                    
+                    {% if status.progress %}
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {% widthratio status.current_session status.program.total_sessions 100 %}%"
+                                 aria-valuenow="{% widthratio status.current_session status.program.total_sessions 100 %}"
+                                 aria-valuemin="0" aria-valuemax="100">
+                                Session {{ status.current_session }} of {{ status.program.total_sessions }}
+                            </div>
+                        </div>
+                        
+                        {% if status.completed %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill"></i> Program completed!
+                            </div>
+                            <a href="{% url 'guided_writing:guided_session' status.program.id status.current_session %}" 
+                               class="btn btn-outline-primary">Review Last Session</a>
+                        {% else %}
+                            <a href="{% url 'guided_writing:guided_session' status.program.id status.current_session %}" 
+                               class="btn btn-primary">Continue Session {{ status.current_session }}</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'guided_writing:start_program' status.program.id %}" 
+                           class="btn btn-primary">Start Program</a>
+                    {% endif %}
+                </div>
+                
+                {% if status.progress and not status.completed %}
+                <div class="card-footer">
+                    <small class="text-muted">
+                        Started on {{ status.progress.started_at|date:"F j, Y" }}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No guided writing programs are available at the moment.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
