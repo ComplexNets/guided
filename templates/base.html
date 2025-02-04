@@ -89,6 +89,7 @@
             flex: 1;
             display: flex;
             overflow: hidden;
+            position: relative;
         }
 
         .left-panel {
@@ -101,6 +102,46 @@
             flex-shrink: 0;
             transition: width 0.3s ease;
             position: relative;
+        }
+
+        .left-panel.collapsed {
+            width: 0;
+        }
+
+        .left-panel.collapsed .entries-panel {
+            opacity: 0;
+        }
+
+        .collapse-button {
+            position: absolute;
+            right: -30px;
+            top: 10px;
+            z-index: 100;
+            cursor: pointer;
+            border: none;
+            background: var(--panel-bg);
+            padding: 8px;
+            color: var(--text-color);
+            border: 1px solid var(--entry-border);
+            border-radius: 0 4px 4px 0;
+            transition: background-color 0.2s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collapse-button:hover {
+            background-color: var(--entry-hover-bg);
+        }
+
+        .left-panel.collapsed .collapse-button i {
+            transform: rotate(180deg);
+        }
+
+        .collapse-button i {
+            transition: transform 0.3s ease;
         }
 
         .main-panel {

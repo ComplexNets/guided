@@ -25,8 +25,8 @@ class Command(BaseCommand):
                 'title': 'Writing the Facts',
                 'description': '''In this first session, focus on describing what happened as objectively as possible.
                 Stick to the facts: what occurred, when, where, and who was involved.
-                Try to write without including your emotions or interpretations.''',
-                'prompt': '''Write about what happened, focusing only on the objective facts.
+                Try to write without including your emotions or interpretations.
+                Write about what happened, focusing only on the objective facts.
                 What occurred? When did it happen? Where were you? Who was involved?
                 Try to be as detailed and specific as possible while remaining factual.'''
             },
