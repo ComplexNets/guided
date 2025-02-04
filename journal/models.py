@@ -21,6 +21,8 @@ class UserProfile(models.Model):
     occupation = models.CharField(max_length=100, blank=True)
     interests = models.TextField(blank=True)
     values = models.TextField(blank=True, help_text="Personal values and beliefs")
+    activities = models.TextField(blank=True, help_text="Regular activities and hobbies")
+    background = models.TextField(blank=True, help_text="Historical background and experiences")
     
     def __str__(self):
         return f"{self.user.username}'s Profile"

@@ -34,7 +34,7 @@ def new_entry(request):
                     entry.feedback = "AI feedback could not be generated at this time."
                     messages.warning(request, str(e))
             entry.save()
-            return redirect('edit_entry', pk=entry.pk)
+            return redirect('journal:entry_edit', pk=entry.pk)
     else:
         form = JournalEntryForm()
     
@@ -42,7 +42,8 @@ def new_entry(request):
     return render(request, 'journal/entry_form.html', {
         'form': form,
         'entries': entries,
-        'active_entry': None
+        'active_entry': None,
+        'openai_model': settings.OPENAI_MODEL
     })
 
 @login_required
@@ -62,7 +63,7 @@ def edit_entry(request, pk):
                     entry.feedback = "AI feedback could not be generated at this time."
                     messages.warning(request, str(e))
             entry.save()
-            return redirect('edit_entry', pk=entry.pk)
+            return redirect('journal:entry_edit', pk=entry.pk)
     else:
         form = JournalEntryForm(instance=entry)
     
@@ -88,7 +89,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, 'Registration successful!')
-            return redirect('home')
+            return redirect('journal:home')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -103,22 +104,41 @@ def register(request):
 
 @login_required
 def profile(request):
-    # Create profile if it doesn't exist
-    if not hasattr(request.user, 'userprofile'):
-        UserProfile.objects.create(user=request.user)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
     
     if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=request.user.userprofile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('profile')
-    else:
-        form = UserProfileForm(instance=request.user.userprofile)
+        # Update basic information
+        profile.age = request.POST.get('age')
+        profile.occupation = request.POST.get('occupation')
+        
+        # Update personality dimensions
+        profile.openness = request.POST.get('openness')
+        profile.conscientiousness = request.POST.get('conscientiousness')
+        profile.extraversion = request.POST.get('extraversion')
+        profile.agreeableness = request.POST.get('agreeableness')
+        profile.neuroticism = request.POST.get('neuroticism')
+        
+        # Update personal information
+        profile.goals = request.POST.get('goals')
+        profile.interests = request.POST.get('interests')
+        profile.values = request.POST.get('values')
+        profile.activities = request.POST.get('activities')
+        profile.background = request.POST.get('background')
+        
+        profile.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('journal:profile')
     
-    entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
+    # Prepare personality traits for the template
+    personality_traits = {
+        'openness': profile.openness or 0,
+        'conscientiousness': profile.conscientiousness or 0,
+        'extraversion': profile.extraversion or 0,
+        'agreeableness': profile.agreeableness or 0,
+        'neuroticism': profile.neuroticism or 0
+    }
+    
     return render(request, 'journal/profile.html', {
-        'form': form,
-        'entries': entries,
-        'active_entry': None
+        'profile': profile,
+        'personality_traits': personality_traits
     })

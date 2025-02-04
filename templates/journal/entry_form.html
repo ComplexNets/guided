@@ -5,222 +5,173 @@
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <style>
     .ql-editor {
-        min-height: 300px;
-        font-family: var(--bs-body-font-family);
+        min-height: 400px;
         font-size: 1.1rem;
         line-height: 1.6;
     }
     
     .ql-toolbar.ql-snow, .ql-container.ql-snow {
-        border-color: var(--entry-border);
+        border-color: rgb(75 85 99 / 0.2);
     }
     
     .ql-toolbar.ql-snow {
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        background-color: var(--entry-bg);
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        background-color: rgb(255 255 255 / 0.05);
     }
     
     .ql-container.ql-snow {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        background-color: var(--entry-bg);
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        background-color: rgb(255 255 255 / 0.05);
     }
     
-    .ql-snow .ql-stroke {
-        stroke: var(--text-color);
+    .dark .ql-snow .ql-stroke {
+        stroke: #e5e7eb;
     }
     
-    .ql-snow .ql-fill {
-        fill: var(--text-color);
+    .dark .ql-snow .ql-fill {
+        fill: #e5e7eb;
     }
     
-    .ql-snow .ql-picker {
-        color: var(--text-color);
+    .dark .ql-snow .ql-picker {
+        color: #e5e7eb;
     }
     
-    .ql-snow .ql-picker-options {
-        background-color: var(--entry-bg);
-        border-color: var(--entry-border);
+    .dark .ql-snow .ql-picker-options {
+        background-color: rgb(45 45 45);
+        border-color: rgb(64 64 64);
     }
     
-    .ql-snow.ql-toolbar button:hover,
-    .ql-snow .ql-toolbar button:hover,
-    .ql-snow.ql-toolbar button:focus,
-    .ql-snow .ql-toolbar button:focus,
-    .ql-snow.ql-toolbar button.ql-active,
-    .ql-snow .ql-toolbar button.ql-active,
-    .ql-snow.ql-toolbar .ql-picker-label:hover,
-    .ql-snow .ql-toolbar .ql-picker-label:hover,
-    .ql-snow.ql-toolbar .ql-picker-label.ql-active,
-    .ql-snow .ql-toolbar .ql-picker-label.ql-active,
-    .ql-snow.ql-toolbar .ql-picker-item:hover,
-    .ql-snow .ql-toolbar .ql-picker-item:hover,
-    .ql-snow.ql-toolbar .ql-picker-item.ql-selected,
-    .ql-snow .ql-toolbar .ql-picker-item.ql-selected {
-        color: #0d6efd;
+    .dark .ql-snow.ql-toolbar button:hover .ql-stroke,
+    .dark .ql-snow .ql-toolbar button:hover .ql-stroke,
+    .dark .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+    .dark .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+        stroke: #60a5fa;
     }
     
-    .ql-snow.ql-toolbar button:hover .ql-stroke,
-    .ql-snow .ql-toolbar button:hover .ql-stroke,
-    .ql-snow.ql-toolbar button:focus .ql-stroke,
-    .ql-snow .ql-toolbar button:focus .ql-stroke,
-    .ql-snow.ql-toolbar button.ql-active .ql-stroke,
-    .ql-snow .ql-toolbar button.ql-active .ql-stroke,
-    .ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
-    .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke {
-        stroke: #0d6efd;
-    }
-    
-    .ql-snow.ql-toolbar button:hover .ql-fill,
-    .ql-snow .ql-toolbar button:hover .ql-fill,
-    .ql-snow.ql-toolbar button:focus .ql-fill,
-    .ql-snow .ql-toolbar button:focus .ql-fill,
-    .ql-snow.ql-toolbar button.ql-active .ql-fill,
-    .ql-snow .ql-toolbar button.ql-active .ql-fill {
-        fill: #0d6efd;
+    .dark .ql-snow.ql-toolbar button:hover .ql-fill,
+    .dark .ql-snow .ql-toolbar button:hover .ql-fill,
+    .dark .ql-snow.ql-toolbar button.ql-active .ql-fill,
+    .dark .ql-snow .ql-toolbar button.ql-active .ql-fill {
+        fill: #60a5fa;
     }
 </style>
 {% endblock %}
 
-{% block left_panel %}
-<div class="entries-panel">
-    <div class="entries-header">
-        <h2 class="entries-title">Your Entries</h2>
-        <a href="{% url 'new_entry' %}" class="btn btn-sm btn-primary new-entry-btn">New Entry</a>
-    </div>
-    {% if entries %}
-        <div class="entry-list">
-            {% for entry in entries %}
-                <div class="entry-item {% if entry.pk == active_entry.pk %}active{% endif %}">
-                    <div class="entry-content">
-                        <a href="{% url 'edit_entry' entry.pk %}" class="text-decoration-none" style="color: inherit;">
-                            <div class="entry-title">{{ entry.title|truncatechars:40 }}</div>
-                            <div class="entry-date">{{ entry.created_at|date:"F j, Y" }}</div>
-                        </a>
-                    </div>
-                    <button class="entry-delete" onclick="deleteEntry({{ entry.pk }}, event)" title="Delete entry">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="text-center mt-4">
-            <p class="text-muted">No entries yet</p>
-            <a href="{% url 'new_entry' %}" class="btn btn-primary">Write Your First Entry</a>
-        </div>
-    {% endif %}
-</div>
-{% endblock %}
-
-{% block title %}New Journal Entry{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Entry{% else %}New Entry{% endif %}{% endblock %}
 
 {% block content %}
-<div class="writing-panel">
-    <form method="post" class="writing-container" id="entryForm">
+<div class="flex-1 overflow-auto p-6">
+    <form method="post" id="entryForm" class="h-full flex flex-col">
         {% csrf_token %}
-        <div class="writing-header mb-3">
-            {{ form.title }}
-            {% if form.title.errors %}
-                <div class="invalid-feedback d-block">
-                    {{ form.title.errors }}
-                </div>
-            {% endif %}
+        
+        <!-- Title Input -->
+        <div class="mb-6">
+            <input type="text" 
+                   name="title" 
+                   value="{{ form.title.value|default:'' }}"
+                   placeholder="Entry Title"
+                   class="w-full text-3xl font-semibold bg-transparent border-0 p-0 focus:ring-0 placeholder-gray-400 dark:placeholder-gray-600">
         </div>
-        
-        <div id="editor">{{ form.instance.content|safe }}</div>
-        {{ form.content.as_hidden }}
-        {% if form.content.errors %}
-            <div class="invalid-feedback d-block">
-                {{ form.content.errors }}
-            </div>
-        {% endif %}
-        
-        <div class="writing-footer d-flex justify-content-between align-items-center mt-3">
-            <div class="d-flex align-items-center">
-                <select class="form-select form-select-sm me-2" name="analysis_mode" style="width: auto;">
-                    {% for value, label in form.instance.ANALYSIS_MODES %}
-                    <option value="{{ value }}" {% if form.instance.analysis_mode == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                    {% endfor %}
-                </select>
-                <button type="button" class="btn btn-outline-primary" id="analyzeButton">
-                    <i class="bi bi-magic"></i> Analyze
+
+        <!-- Analysis Mode Selection -->
+        <div class="mb-4 flex items-center space-x-4">
+            <select name="analysis_mode" 
+                    class="px-3 py-2 bg-white dark:bg-dark-panel border border-gray-300 dark:border-dark-border rounded-md text-sm">
+                {% for value, label in form.instance.ANALYSIS_MODES %}
+                <option value="{{ value }}" {% if form.instance.analysis_mode == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+            <span class="text-sm text-gray-500">{{ openai_model }}</span>
+        </div>
+
+        <!-- Rich Text Editor -->
+        <div class="flex-1 mb-6">
+            <input type="hidden" name="content" id="hiddenContent">
+            <div id="editor" class="h-full">{{ form.content.value|safe }}</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-dark-border">
+            <div class="flex items-center space-x-4">
+                <button type="submit" 
+                        name="action" 
+                        value="save"
+                        class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors">
+                    Save Entry
                 </button>
-                <span class="ms-2 text-muted small">{{ openai_model }}</span>
+                <button type="submit" 
+                        name="action" 
+                        value="analyze"
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors">
+                    <i class="bi bi-magic me-2"></i>
+                    Analyze
+                </button>
             </div>
-            <div>
-                <button type="submit" class="btn btn-primary" name="action" value="save">Save Entry</button>
-                <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
-            </div>
+            
+            {% if form.instance.pk %}
+            <button type="button"
+                    onclick="deleteEntry({{ form.instance.pk }})"
+                    class="px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                Delete Entry
+            </button>
+            {% endif %}
         </div>
     </form>
 </div>
-
-<script>
-var quill = new Quill('#editor', {
-    theme: 'snow',
-    modules: {
-        toolbar: [
-            [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
-            [{ 'color': [] }, { 'background': [] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'align': [] }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
-            ['clean']
-        ]
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('entryForm');
-    const analyzeButton = document.getElementById('analyzeButton');
-    const spinner = document.getElementById('feedbackSpinner');
-    
-    if (analyzeButton) {
-        analyzeButton.addEventListener('click', function() {
-            // Update hidden form field with editor content
-            document.querySelector('#id_content').value = quill.root.innerHTML;
-            
-            // Add a hidden input for the analyze action
-            const actionInput = document.createElement('input');
-            actionInput.type = 'hidden';
-            actionInput.name = 'action';
-            actionInput.value = 'analyze';
-            form.appendChild(actionInput);
-            
-            // Show spinner
-            if (spinner) {
-                spinner.style.display = 'inline-block';
-            }
-            
-            // Disable analyze button and update text
-            analyzeButton.disabled = true;
-            const originalContent = analyzeButton.innerHTML;
-            analyzeButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
-            
-            // Submit form
-            form.submit();
-        });
-    }
-});
-
-// Update hidden form field before submitting
-document.getElementById('entryForm').addEventListener('submit', function() {
-    document.querySelector('#id_content').value = quill.root.innerHTML;
-});
-</script>
 {% endblock %}
 
-{% block feedback %}
+{% block right_panel %}
 {% if form.instance.feedback %}
-<div class="feedback-card">
-    <h6 class="text-muted mb-2">AI Feedback</h6>
-    <p class="mb-0">{{ form.instance.feedback }}</p>
-    <div id="feedbackSpinner" style="display: none;">Loading...</div>
+<div class="h-full p-6 overflow-y-auto">
+    <div class="bg-white dark:bg-dark-panel rounded-lg shadow-sm p-4 border border-gray-200 dark:border-dark-border">
+        <h6 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">AI Feedback</h6>
+        <div class="prose dark:prose-invert max-w-none">
+            {{ form.instance.feedback|linebreaks }}
+        </div>
+    </div>
+    <div id="feedbackSpinner" class="hidden mt-4 text-center">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-primary-600"></div>
+        <p class="mt-2 text-gray-500">Analyzing your entry...</p>
+    </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        placeholder: 'Start writing...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('entryForm');
+        const spinner = document.getElementById('feedbackSpinner');
+        
+        form.addEventListener('submit', function(e) {
+            const contentInput = document.querySelector('#hiddenContent');
+            contentInput.value = quill.root.innerHTML;
+            
+            if (e.submitter.value === 'analyze' && spinner) {
+                spinner.classList.remove('hidden');
+            }
+        });
+    });
+</script>
 {% endblock %}

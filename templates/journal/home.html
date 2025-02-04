@@ -2,26 +2,38 @@
 
 {% block title %}My Journal{% endblock %}
 
+{% block left_panel %}
+{% include 'journal/includes/entry_list.html' %}
+{% endblock %}
+
 {% block content %}
-<div class="writing-panel">
-    <div class="writing-container text-center text-muted d-flex flex-column justify-content-center">
-        <h3>Welcome to Your Journal</h3>
-        <p class="lead">Select an entry to edit or create a new one</p>
-        <div>
-            <a href="{% url 'new_entry' %}" class="btn btn-primary">New Entry</a>
-        </div>
+<div class="flex items-center justify-center h-full">
+    <div class="text-center max-w-lg">
+        <h3 class="text-2xl font-semibold mb-4">Welcome to Your Journal</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Select an entry to edit or create a new one</p>
+        <a href="{% url 'journal:entry_new' %}" 
+           class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+            <i class="bi bi-plus-lg mr-2"></i>
+            New Entry
+        </a>
     </div>
 </div>
 {% endblock %}
 
-{% block feedback %}
+{% block right_panel %}
 {% if entries %}
     {% with latest_entry=entries.first %}
         {% if latest_entry.feedback %}
-        <div class="feedback-card">
-            <h6 class="text-muted mb-2">Latest Feedback</h6>
-            <p class="mb-0">{{ latest_entry.feedback }}</p>
-            <small class="text-muted d-block mt-2">From: {{ latest_entry.title }}</small>
+        <div class="p-6">
+            <div class="bg-white dark:bg-dark-panel rounded-lg shadow-sm p-4 border border-gray-200 dark:border-dark-border">
+                <h6 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">Latest Feedback</h6>
+                <div class="prose dark:prose-invert max-w-none">
+                    {{ latest_entry.feedback|linebreaks }}
+                </div>
+                <div class="mt-3 text-sm text-gray-500">
+                    From: {{ latest_entry.title }}
+                </div>
+            </div>
         </div>
         {% endif %}
     {% endwith %}

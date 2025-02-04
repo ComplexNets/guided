@@ -3,94 +3,152 @@
 {% block title %}Profile{% endblock %}
 
 {% block content %}
-<div class="writing-panel">
-    <div class="writing-container">
-        <h2 class="mb-4">Your Profile</h2>
-        
-        <form method="post" class="needs-validation" novalidate>
-            {% csrf_token %}
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Basic Information</h5>
-                    <div class="mb-3">
-                        <label for="{{ form.age.id_for_label }}" class="form-label">Age</label>
-                        {{ form.age }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.occupation.id_for_label }}" class="form-label">Occupation</label>
-                        {{ form.occupation }}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Personality Dimensions</h5>
-                    <p class="text-muted small mb-4">Rate yourself on each dimension from 0 to 100</p>
+<style>
+    /* Custom range input styling */
+    input[type="range"] {
+        -webkit-appearance: none;
+        height: 8px;
+        border-radius: 4px;
+        background: transparent;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3b82f6;
+        cursor: pointer;
+        border: none;
+        margin-top: -4px; /* Centers the thumb */
+    }
+
+    input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #3b82f6;
+        cursor: pointer;
+        border: none;
+    }
+
+    input[type="range"]::-moz-range-track {
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .dark input[type="range"]::-webkit-slider-thumb {
+        background: #60a5fa;
+    }
+
+    .dark input[type="range"]::-moz-range-thumb {
+        background: #60a5fa;
+    }
+</style>
+
+<div class="p-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white dark:bg-dark-panel border border-gray-200 dark:border-dark-border rounded-lg shadow-sm">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold mb-6">Your Profile</h1>
+                
+                <form method="post">
+                    {% csrf_token %}
                     
-                    {% for field in form %}
-                        {% if field.name in 'openness,conscientiousness,extraversion,agreeableness,neuroticism' %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label d-flex justify-content-between">
-                                <span>{{ field.label }}</span>
-                                <span class="text-muted" id="{{ field.name }}_value"></span>
-                            </label>
-                            {{ field }}
+                    <!-- Basic Information -->
+                    <div class="mb-8">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Basic Information</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age</label>
+                                <input type="number" name="age" value="{{ profile.age }}" 
+                                       class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Occupation</label>
+                                <input type="text" name="occupation" value="{{ profile.occupation }}" 
+                                       class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">
+                            </div>
                         </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Personal Information</h5>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.goals.id_for_label }}" class="form-label">Goals</label>
-                        {{ form.goals }}
-                        <div class="form-text">{{ form.goals.help_text }}</div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="{{ form.interests.id_for_label }}" class="form-label">Interests</label>
-                        {{ form.interests }}
-                        <div class="form-text">{{ form.interests.help_text }}</div>
+                    <!-- Personality Dimensions -->
+                    <div class="mb-8">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Personality Dimensions</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Rate yourself on each dimension from 0 to 100</p>
+                        
+                        <div class="space-y-6">
+                            {% for trait, value in personality_traits.items %}
+                            <div>
+                                <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                    <span>{{ trait|title }}</span>
+                                    <span class="trait-value">{{ value }}</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="range" name="{{ trait }}" value="{{ value }}" min="0" max="100"
+                                           class="w-full appearance-none bg-gray-200 dark:bg-dark-border"
+                                           oninput="this.previousElementSibling.querySelector('.trait-value').textContent = this.value">
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="{{ form.values.id_for_label }}" class="form-label">Values</label>
-                        {{ form.values }}
-                        <div class="form-text">{{ form.values.help_text }}</div>
+                    <!-- Personal Information -->
+                    <div class="mb-8">
+                        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Personal Information</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Goals</label>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">What are your main goals and aspirations?</p>
+                                <textarea name="goals" rows="3" 
+                                          class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">{{ profile.goals }}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interests</label>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">What are your main interests and hobbies?</p>
+                                <textarea name="interests" rows="3" 
+                                          class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">{{ profile.interests }}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Values</label>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">What are your core values and beliefs?</p>
+                                <textarea name="values" rows="3" 
+                                          class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">{{ profile.values }}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Activities</label>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">What activities do you enjoy or participate in regularly?</p>
+                                <textarea name="activities" rows="3" 
+                                          class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">{{ profile.activities }}</textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Background</label>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Share your relevant historical background or experiences</p>
+                                <textarea name="background" rows="3" 
+                                          class="w-full px-3 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border rounded-md focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-600 focus:border-transparent">{{ profile.background }}</textarea>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors">
+                            Save Profile
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">Save Profile</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Update range input values
-    const ranges = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'];
-    ranges.forEach(function(name) {
-        const input = document.querySelector(`#id_${name}`);
-        const value = document.querySelector(`#${name}_value`);
-        
-        if (input && value) {
-            // Initial value
-            value.textContent = input.value;
-            
-            // Update on change
-            input.addEventListener('input', function() {
-                value.textContent = this.value;
-            });
-        }
+document.querySelectorAll('input[type="range"]').forEach(range => {
+    range.addEventListener('input', function() {
+        const valueDisplay = this.parentElement.previousElementSibling.querySelector('.trait-value');
+        valueDisplay.textContent = this.value;
     });
 });
 </script>

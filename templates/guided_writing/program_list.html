@@ -1,60 +1,82 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Guided Writing Programs{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Guided Writing Programs</h2>
-    
-    <div class="row">
-        {% for status in program_status %}
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ status.program.name }}</h5>
-                    <p class="card-text">{{ status.program.description }}</p>
+<div class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Guided Writing Programs</h1>
+        
+        <div class="grid gap-6 md:grid-cols-2">
+            {% for status in program_status %}
+            <div class="bg-white dark:bg-dark-panel border border-gray-200 dark:border-dark-border rounded-lg shadow-sm overflow-hidden">
+                <!-- Program Header -->
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold mb-2">{{ status.program.name }}</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">{{ status.program.description }}</p>
                     
-                    {% if status.progress %}
-                        <div class="progress mb-3">
-                            <div class="progress-bar" role="progressbar" 
-                                 style="width: {% widthratio status.current_session status.program.total_sessions 100 %}%"
-                                 aria-valuenow="{% widthratio status.current_session status.program.total_sessions 100 %}"
-                                 aria-valuemin="0" aria-valuemax="100">
-                                Session {{ status.current_session }} of {{ status.program.total_sessions }}
-                            </div>
+                    <!-- Program Stats -->
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        <div class="flex items-center">
+                            <i class="bi bi-clock mr-1"></i>
+                            {{ status.program.duration }} minutes
                         </div>
-                        
+                        <div class="flex items-center">
+                            <i class="bi bi-collection mr-1"></i>
+                            {{ status.program.total_sessions }} sessions
+                        </div>
+                    </div>
+                    
+                    <!-- Progress -->
+                    {% if status.progress %}
                         {% if status.completed %}
-                            <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill"></i> Program completed!
+                            <div class="mb-4">
+                                <div class="flex items-center text-green-600 dark:text-green-400 mb-2">
+                                    <i class="bi bi-check-circle-fill mr-2"></i>
+                                    <span class="font-medium">Program completed!</span>
+                                </div>
+                                <a href="{% url 'guided_writing:guided_session' status.program.id status.current_session %}" 
+                                   class="inline-flex items-center px-4 py-2 bg-white dark:bg-dark-surface border border-gray-300 dark:border-dark-border text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-dark-border transition-colors">
+                                    <i class="bi bi-arrow-clockwise mr-1"></i>
+                                    Review Last Session
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    <span>Progress</span>
+                                    <span>Session {{ status.current_session }} of {{ status.program.total_sessions }}</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-dark-border rounded-full h-2">
+                                    {% widthratio status.current_session status.program.total_sessions 100 as progress_percent %}
+                                    <div class="bg-primary-600 h-2 rounded-full" style="width: {{ progress_percent }}%"></div>
+                                </div>
                             </div>
                             <a href="{% url 'guided_writing:guided_session' status.program.id status.current_session %}" 
-                               class="btn btn-outline-primary">Review Last Session</a>
-                        {% else %}
-                            <a href="{% url 'guided_writing:guided_session' status.program.id status.current_session %}" 
-                               class="btn btn-primary">Continue Session {{ status.current_session }}</a>
+                               class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors">
+                                <i class="bi bi-play-fill mr-1"></i>
+                                Continue Session {{ status.current_session }}
+                            </a>
                         {% endif %}
                     {% else %}
                         <a href="{% url 'guided_writing:start_program' status.program.id %}" 
-                           class="btn btn-primary">Start Program</a>
+                           class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors">
+                            <i class="bi bi-play-fill mr-1"></i>
+                            Start Program
+                        </a>
                     {% endif %}
                 </div>
-                
-                {% if status.progress and not status.completed %}
-                <div class="card-footer">
-                    <small class="text-muted">
-                        Started on {{ status.progress.started_at|date:"F j, Y" }}
-                    </small>
+            </div>
+            {% empty %}
+            <div class="bg-white dark:bg-dark-panel border border-gray-200 dark:border-dark-border rounded-lg p-6">
+                <div class="text-center text-gray-600 dark:text-gray-400">
+                    <i class="bi bi-journal-text text-4xl mb-2"></i>
+                    <p>No guided writing programs are available at the moment.</p>
                 </div>
-                {% endif %}
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info">
-                No guided writing programs are available at the moment.
-            </div>
-        </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -1,669 +1,186 @@
 <!DOCTYPE html>
-{% load journal_extras %}
-<html lang="en" data-bs-theme="light">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Journal{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    {% block extra_head %}{% endblock %}
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        },
+                        dark: {
+                            surface: '#1a1a1a',
+                            panel: '#2d2d2d',
+                            border: '#404040',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Custom Styles -->
     <style>
-        :root {
-            --sidebar-width: 350px;
-            --feedback-width: 300px;
-        }
-
-        :root[data-bs-theme="dark"] {
-            --entry-bg: #2b3035;
-            --entry-border: #373b3e;
-            --entry-hover-bg: #31373d;
-            --entry-hover-border: #4d5154;
-            --entry-active-bg: #31373d;
-            --entry-active-border: #0d6efd;
-            --panel-bg: #212529;
-            --main-bg: #2b3035;
-            --text-color: #e9ecef;
-            --text-muted: #adb5bd;
-        }
-
-        :root[data-bs-theme="light"] {
-            --entry-bg: #fff;
-            --entry-border: #dee2e6;
-            --entry-hover-bg: #e9ecef;
-            --entry-hover-border: #adb5bd;
-            --entry-active-bg: #e9ecef;
-            --entry-active-border: #0d6efd;
-            --panel-bg: #f8f9fa;
-            --main-bg: #fff;
-            --text-color: #212529;
-            --text-muted: #6c757d;
-        }
-
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            background-color: var(--panel-bg);
-            color: var(--text-color);
-        }
-
-        /* Navbar Styles */
-        .navbar {
-            background-color: #1a1a1a;
-            padding: 0.5rem 0;
-            flex-shrink: 0;
+        /* Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
         
-        .navbar .nav-link {
-            color: rgba(255, 255, 255, 0.85);
-            padding: 0.5rem 1rem;
-            transition: color 0.2s;
-        }
-        
-        .navbar .nav-link:hover,
-        .navbar .nav-link.active {
-            color: #fff;
-        }
-        
-        .navbar .theme-toggle {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.85);
-            cursor: pointer;
-            padding: 0.5rem;
-            transition: color 0.2s;
-        }
-        
-        .navbar .theme-toggle:hover {
-            color: #fff;
-        }
-
-        /* Panel Layout */
-        .main-container {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .left-panel {
-            width: var(--sidebar-width);
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--entry-border);
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            flex-shrink: 0;
-            transition: width 0.3s ease;
-            position: relative;
-        }
-
-        .left-panel.collapsed {
-            width: 0;
-        }
-
-        .left-panel.collapsed .entries-panel {
-            opacity: 0;
-        }
-
-        .collapse-button {
-            position: absolute;
-            right: -30px;
-            top: 10px;
-            z-index: 100;
-            cursor: pointer;
-            border: none;
-            background: var(--panel-bg);
-            padding: 8px;
-            color: var(--text-color);
-            border: 1px solid var(--entry-border);
-            border-radius: 0 4px 4px 0;
-            transition: background-color 0.2s;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .collapse-button:hover {
-            background-color: var(--entry-hover-bg);
-        }
-
-        .left-panel.collapsed .collapse-button i {
-            transform: rotate(180deg);
-        }
-
-        .collapse-button i {
-            transition: transform 0.3s ease;
-        }
-
-        .main-panel {
-            flex: 1;
-            background-color: var(--main-bg);
-            display: flex;
-            flex-direction: column;
-            overflow: auto;
-            padding: 1.5rem;
-        }
-
-        .right-panel {
-            width: var(--feedback-width);
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--entry-border);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow-y: auto;
-            flex-shrink: 0;
-            transition: width 0.1s ease;
-        }
-
-        .panel-resizer {
-            position: absolute;
-            top: 0;
-            left: -5px;
-            width: 10px;
-            height: 100%;
-            cursor: col-resize;
-            z-index: 100;
-        }
-
-        .panel-resizer:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.1);
-        }
-
-        .panel-resizer.dragging {
-            background-color: rgba(var(--bs-primary-rgb), 0.2);
-        }
-
-        /* Feedback Card Styles */
-        .feedback-card {
-            padding: 1.5rem;
-            margin: 1rem;
-            background-color: var(--entry-bg);
-            border: 1px solid var(--entry-border);
-            border-radius: 4px;
-        }
-
-        .feedback-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--entry-border);
-        }
-
-        .feedback-header h6 {
-            margin: 0;
-            color: var(--text-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.875rem;
-        }
-
-        .feedback-meta {
-            margin-top: 1rem;
-            padding-top: 0.5rem;
-            border-top: 1px solid var(--entry-border);
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
-
-        /* Entries Panel Styles */
-        .entries-panel {
-            opacity: 1;
-            transition: opacity 0.2s ease;
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .entries-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--entry-border);
-        }
-
-        .entries-title {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: var(--text-color);
-            margin: 0;
-        }
-
-        .new-entry-btn {
-            padding: 0.375rem 1rem;
-        }
-
-        .entry-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .entry-item {
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            text-decoration: none;
-            color: var(--text-color);
-            border: 1px solid var(--entry-border);
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            background-color: var(--entry-bg);
-            position: relative;
-        }
-
-        .entry-item:hover {
-            background-color: var(--entry-hover-bg);
-            border-color: var(--entry-hover-border);
-            color: var(--text-color);
-        }
-
-        .entry-item.active {
-            background-color: var(--entry-active-bg);
-            border-color: var(--entry-active-border);
-        }
-
-        .entry-content {
-            margin-right: 2rem;
-        }
-
-        .entry-title {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-            line-height: 1.2;
-            color: var(--text-color);
-        }
-
-        .entry-date {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .entry-delete {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 0.25rem 0.5rem;
-            color: var(--text-muted);
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: none;
-        }
-
-        .entry-item:hover .entry-delete {
-            display: block;
-        }
-
-        .entry-delete:hover {
-            color: #dc3545;
-        }
-
-        /* Writing Panel Styles */
-        .writing-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem;
-            background-color: var(--main-bg);
-        }
-
-        .writing-container {
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .writing-title {
-            font-size: 1.75rem;
-            font-weight: 500;
-            color: var(--text-color);
-            border: none;
-            width: 100%;
-            padding: 0.5rem 0;
-            margin-bottom: 1rem;
+        ::-webkit-scrollbar-track {
             background: transparent;
         }
-
-        .writing-title:focus {
-            outline: none;
-            border-color: #86b7fe;
-        }
-
-        .writing-content {
-            flex: 1;
-            border: none;
-            resize: none;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--text-color);
-            padding: 0;
-            background: transparent;
-            min-height: 300px;
-        }
-
-        .writing-content:focus {
-            outline: none;
-        }
-
-        /* Guided Writing Styles */
-        .progress {
-            height: 1.5rem;
-            background-color: #e9ecef;
-            border-radius: 0.5rem;
-        }
         
-        .progress-bar {
-            background-color: #0d6efd;
-            color: white;
-            font-size: 0.875rem;
-            line-height: 1.5rem;
-            font-weight: 500;
-        }
-        
-        .alert-info {
-            background-color: #f8f9fa;
-            border-color: #dee2e6;
-            color: #495057;
-        }
-        
-        .card {
-            border-radius: 0.5rem;
-            border: 1px solid rgba(0,0,0,.125);
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
-        }
-        
-        .card-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid rgba(0,0,0,.125);
-        }
-        
-        textarea.form-control {
-            font-size: 1rem;
-            line-height: 1.6;
-            padding: 1rem;
-        }
-        
-        textarea.form-control:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
-        }
-        
-        .loading-spinner {
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #0d6efd;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Prevent text selection while dragging */
-        .resize-active {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-
-        .messages {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-        }
-
-        .message {
-            margin-bottom: 0.5rem;
-            padding: 1rem;
+        ::-webkit-scrollbar-thumb {
+            background: #666;
             border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 300px;
         }
-
-        /* Dark mode toggle button */
-        .theme-toggle {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
         }
-
-        .theme-toggle:hover {
-            color: var(--text-color);
+        
+        /* Dark mode scrollbar */
+        .dark ::-webkit-scrollbar-thumb {
+            background: #404040;
         }
-
-        .theme-toggle i {
-            font-size: 1.1rem;
-        }
-
-        /* Loading spinner */
-        .loading-spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--text-muted);
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
         }
     </style>
+    
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid px-4">
-            <div class="navbar-nav me-auto">
-                <button class="theme-toggle me-3" id="themeToggle" title="Toggle dark mode">
-                    <i class="bi bi-moon-fill"></i>
-                </button>
-                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                    <i class="bi bi-journal-text"></i> Journal
-                </a>
-                <a href="{% url 'guided_writing:program_list' %}" class="nav-link {% if 'guided_writing' in request.resolver_match.namespace %}active{% endif %}">
-                    <i class="bi bi-compass"></i> Guided Writing
+<body class="h-full bg-gray-50 dark:bg-dark-surface text-gray-900 dark:text-gray-100">
+    {% if user.is_authenticated %}
+    <!-- Top Navigation -->
+    <nav class="h-16 bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+        <div class="h-full px-4 flex items-center justify-between">
+            <!-- Left side -->
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'journal:home' %}" class="text-xl font-semibold">Journal</a>
+                <a href="{% url 'guided_writing:program_list' %}" 
+                   class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                    <i class="bi bi-compass mr-1"></i>
+                    Guided Writing
                 </a>
             </div>
-            <div class="navbar-nav">
-                <a href="{% url 'profile' %}" class="nav-link">{{ user.username }}</a>
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            
+            <!-- Right side -->
+            <div class="flex items-center space-x-4">
+                <button id="darkModeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-dark-panel rounded-full">
+                    <i class="bi bi-moon-stars dark:hidden"></i>
+                    <i class="bi bi-sun hidden dark:inline"></i>
+                </button>
+                
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button @click="open = !open" 
+                            class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <i class="bi bi-person-circle text-xl"></i>
+                        <span>{{ user.username }}</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-md shadow-lg">
+                        <div class="py-1">
+                            <a href="{% url 'journal:profile' %}" 
+                               class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border transition-colors">
+                                <i class="bi bi-person mr-2"></i>
+                                Profile
+                            </a>
+                            <a href="{% url 'auth:logout' %}" 
+                               class="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border transition-colors">
+                                <i class="bi bi-box-arrow-right mr-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
+    {% endif %}
     
-    <div class="main-container">
+    <!-- Main Layout -->
+    <div class="h-[calc(100vh-4rem)] flex overflow-hidden">
         {% if user.is_authenticated %}
-        <div class="left-panel" id="leftPanel">
-            <button class="collapse-button" id="collapseButton" title="Toggle panel">
-                <i class="bi bi-chevron-left"></i>
-            </button>
+        <!-- Left Panel -->
+        <div id="leftPanel" class="w-[350px] bg-white dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border flex-shrink-0 transition-all duration-300">
             {% block left_panel %}{% endblock %}
         </div>
         {% endif %}
-
-        <div class="main-panel">
-            {% block content %}{% endblock %}
-        </div>
-
-        {% if user.is_authenticated %}
-        <div class="right-panel" id="rightPanel">
-            <div class="panel-resizer" id="rightPanelResizer"></div>
-            {% block feedback %}{% endblock %}
-        </div>
-        {% endif %}
+        
+        <!-- Main Content -->
+        <main class="flex-1 flex overflow-hidden bg-gray-50 dark:bg-dark-surface">
+            <!-- Content Area -->
+            <div class="flex-1 overflow-hidden">
+                {% block content %}{% endblock %}
+            </div>
+            
+            <!-- Right Panel (AI Feedback) -->
+            <div id="rightPanel" class="w-[300px] bg-white dark:bg-dark-surface border-l border-gray-200 dark:border-dark-border flex-shrink-0">
+                {% block right_panel %}{% endblock %}
+            </div>
+        </main>
     </div>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="message alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggle = document.getElementById('themeToggle');
-            const html = document.documentElement;
-            const icon = themeToggle.querySelector('i');
-            
-            // Check for saved theme preference or use system preference
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                html.setAttribute('data-bs-theme', savedTheme);
-                updateIcon(savedTheme === 'dark');
-            } else {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                html.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
-                updateIcon(prefersDark);
-            }
-            
-            // Toggle theme
-            themeToggle.addEventListener('click', function() {
-                const currentTheme = html.getAttribute('data-bs-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                html.setAttribute('data-bs-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateIcon(newTheme === 'dark');
-            });
-            
-            function updateIcon(isDark) {
-                icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-            }
-
-            // Left panel collapse functionality
-            const leftPanel = document.getElementById('leftPanel');
-            const collapseButton = document.getElementById('collapseButton');
-            
-            // Check for saved collapse state
-            const isCollapsed = localStorage.getItem('leftPanelCollapsed') === 'true';
-            if (isCollapsed) {
-                leftPanel.classList.add('collapsed');
-            }
-            
-            collapseButton.addEventListener('click', function() {
-                leftPanel.classList.toggle('collapsed');
-                localStorage.setItem('leftPanelCollapsed', leftPanel.classList.contains('collapsed'));
-            });
-
-            // Right panel resize functionality
-            const rightPanel = document.querySelector('.right-panel');
-            const resizer = document.getElementById('rightPanelResizer');
-            let startX, startWidth;
-
-            function initDrag(e) {
-                startX = e.clientX;
-                startWidth = parseInt(getComputedStyle(rightPanel).width, 10);
-                document.documentElement.classList.add('resize-active');
-                resizer.classList.add('dragging');
-                
-                document.addEventListener('mousemove', doDrag);
-                document.addEventListener('mouseup', stopDrag);
-            }
-
-            function doDrag(e) {
-                const newWidth = startWidth - (e.clientX - startX);
-                // Set minimum and maximum width limits
-                if (newWidth > 200 && newWidth < window.innerWidth * 0.6) {
-                    rightPanel.style.width = `${newWidth}px`;
-                    document.documentElement.style.setProperty('--feedback-width', `${newWidth}px`);
-                }
-            }
-
-            function stopDrag() {
-                document.documentElement.classList.remove('resize-active');
-                resizer.classList.remove('dragging');
-                document.removeEventListener('mousemove', doDrag);
-                document.removeEventListener('mouseup', stopDrag);
-                
-                // Save the width preference
-                const width = parseInt(getComputedStyle(rightPanel).width, 10);
-                localStorage.setItem('rightPanelWidth', width);
-            }
-
-            // Load saved width preference
-            const savedWidth = localStorage.getItem('rightPanelWidth');
-            if (savedWidth) {
-                rightPanel.style.width = `${savedWidth}px`;
-                document.documentElement.style.setProperty('--feedback-width', `${savedWidth}px`);
-            }
-
-            resizer.addEventListener('mousedown', initDrag);
-        });
-
-        // Auto-hide messages after 5 seconds
-        setTimeout(function() {
-            var messages = document.querySelectorAll('.message');
-            messages.forEach(function(message) {
-                message.style.opacity = '0';
-                message.style.transition = 'opacity 0.5s';
-                setTimeout(function() {
-                    message.remove();
-                }, 500);
-            });
-        }, 5000);
-
-        function deleteEntry(entryId, event) {
-            event.preventDefault();
-            if (confirm('Are you sure you want to delete this entry?')) {
-                fetch(`/entry/${entryId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Remove the entry from the DOM
-                        event.target.closest('.entry-item').remove();
-                        // Redirect to home if we're editing the deleted entry
-                        if (window.location.pathname.includes(`/entry/${entryId}/`)) {
-                            window.location.href = '/';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to delete entry. Please try again.');
-                });
-            }
-        }
-    </script>
+    
     {% block extra_js %}{% endblock %}
+    
+    <!-- Dark Mode Toggle -->
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+        
+        darkModeToggle?.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('darkMode', html.classList.contains('dark'));
+        });
+        
+        // Listen for OS theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('darkMode')) {
+                html.classList.toggle('dark', e.matches);
+            }
+        });
+    </script>
 </body>
 </html>
